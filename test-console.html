@@ -1,4 +1,5 @@
 <title>ChqFlow360 — Test Console (Real Rules &amp; Workflow)</title>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 <style>
   html,body{height:100%;margin:0;background:#0B0B10;font-family:'Aptos','Segoe UI',system-ui,-apple-system,sans-serif;}
   *{box-sizing:border-box;}
@@ -76,6 +77,13 @@
   .dropzone b{color:var(--text);display:block;margin-bottom:4px;font-size:12.5px;}
   .thumbs{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;}
   .thumbs img{width:110px;height:70px;object-fit:cover;border-radius:7px;border:1px solid var(--border-lt);}
+  .ocr-progress{height:7px;background:var(--input);border-radius:20px;overflow:hidden;margin:10px 0;}
+  .ocr-progress-fill{height:100%;background:var(--primary);border-radius:20px;transition:width .2s ease;}
+  .ocr-status{font-size:11px;color:var(--text-dim);}
+  .ocr-raw{background:var(--input);border:1px solid var(--border-lt);border-radius:8px;padding:10px;font-family:'Courier New',monospace;font-size:10.5px;color:var(--text-dim);white-space:pre-wrap;max-height:160px;overflow:auto;margin-top:8px;}
+  .ocr-conf-bar{display:flex;align-items:center;gap:8px;margin:8px 0;}
+  .ocr-conf-track{flex:1;height:8px;background:var(--input);border-radius:20px;overflow:hidden;}
+  .ocr-conf-fill{height:100%;border-radius:20px;}
   .tag-row{display:flex;gap:6px;flex-wrap:wrap;}
   .empty{padding:30px 10px;text-align:center;color:var(--text-muted);font-size:11.5px;}
   .tc-desc{font-size:11px;color:var(--text-dim);line-height:1.6;margin-bottom:14px;}
@@ -102,7 +110,7 @@
     </div>
   </div>
   <div class="disclaimer">
-    <b>What's real here, and what isn't:</b> file upload, the amount-in-words &harr; figures check, post-dated/stale date checks, duplicate cheque-number detection, and every workflow state change (submit / approve / reject / resubmit / fraud review) are computed live by this page &mdash; nothing is pre-scripted. <b>OCR and signature-match are simulated</b>: each test case starts you off with seed values (standing in for what OCR/MatchAI would have produced), which you can edit freely before running the checks. Data persists in this browser via local storage, so duplicate detection and your audit trail survive a page refresh &mdash; but not a different browser/device.
+    <b>What's real here, and what isn't:</b> file upload, <b>OCR text recognition</b> (via an in-browser engine — it actually reads your image, nothing is pre-scripted), the amount-in-words &harr; figures check, post-dated/stale date checks, duplicate cheque-number detection, and every workflow state change (submit / approve / reject / resubmit / fraud review) are computed live by this page. <b>Signature-match is still simulated</b> (a seed value you can edit) &mdash; that genuinely needs a trained model the real backend will provide. OCR reads printed text reasonably well but <b>struggles with handwriting</b> &mdash; a known limit of general-purpose OCR, not this tool; it shows you the raw recognized text and a confidence score so you can see exactly what it caught. It also only attempts structured field mapping (name/date) — it doesn't yet understand "this line is the payee" the way a cheque-trained model would. Data persists in this browser via local storage, so duplicate detection and your audit trail survive a page refresh &mdash; but not a different browser/device. <b>Requires internet on first load</b> (to fetch the OCR engine from a CDN, a few MB, cached afterward) — open this via the local file or GitHub Pages link, not the Artifact preview, which blocks that.
   </div>
   <div class="tabs" id="tabs"></div>
   <div id="stage"></div>
@@ -269,10 +277,11 @@ function renderCapture(){
       <div class="tc-desc">${tc.what}</div>
       <div class="dropzone" id="dropzone" onclick="document.getElementById('fileInput').click()">
         <b>&#128247; Click to choose file(s), or drag &amp; drop</b>
-        Any image works — this is for a real upload/preview, not real OCR.
+        Upload a real cheque scan (or any image with text) to try the OCR agent below.
         <input type="file" id="fileInput" accept="image/*" ${tc.batch?'multiple':''} style="display:none;" onchange="handleFiles(this.files)">
       </div>
       <div class="thumbs" id="thumbs"></div>
+      <div id="ocrPanel"></div>
     </div>
     <div class="card">
       <div class="card-head"><h4>Fields</h4><span class="hint">Seeded (simulated OCR) — edit freely</span></div>
@@ -309,6 +318,62 @@ function handleFiles(fileList){
   });
   const t = document.getElementById('thumbs');
   if(t) t.innerHTML = uploadedImages.map(im=>`<img src="${im.url}" title="${im.name}">`).join('');
+  const panel = document.getElementById('ocrPanel');
+  if(panel && uploadedImages.length){
+    panel.innerHTML = `<div style="margin-top:12px;"><button class="btn sm primary" onclick="runOCR()">&#128269; Run OCR Agent on ${uploadedImages.length>1?'first image':'this image'}</button></div>`;
+  }
+}
+
+/* ============ Real, client-side OCR (Tesseract.js — WebAssembly, no server) ============ */
+function extractAmountGuess(text){
+  const m = text.match(/(?:₹|Rs\.?|INR)\s*[\d,]{3,}/i) || text.match(/\b\d{1,3}(?:,\d{2,3})+\b/);
+  if(!m) return null;
+  const digits = m[0].replace(/[^\d]/g,'');
+  return digits ? Number(digits) : null;
+}
+function extractDateGuess(text){
+  const m = text.match(/\b(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})\b/);
+  if(!m) return null;
+  let [_, d, mo, y] = m;
+  if(y.length===2) y = '20'+y;
+  d=d.padStart(2,'0'); mo=mo.padStart(2,'0');
+  const iso = `${y}-${mo}-${d}`;
+  return isNaN(new Date(iso).getTime()) ? null : iso;
+}
+async function runOCR(){
+  const panel = document.getElementById('ocrPanel');
+  if(typeof Tesseract === 'undefined'){
+    panel.innerHTML = `<div class="flow-note bad" style="margin-top:12px;">Couldn't load the OCR engine — this needs internet access on first use (it's fetched from a CDN), and won't work inside the Artifact preview sandbox. Try the local file or the GitHub Pages link instead.</div>`;
+    return;
+  }
+  panel.innerHTML = `<div style="margin-top:12px;"><div class="ocr-status" id="ocrStatus">Starting OCR engine&hellip;</div><div class="ocr-progress"><div class="ocr-progress-fill" id="ocrBar" style="width:0%"></div></div></div>`;
+  try{
+    const img = uploadedImages[0].url;
+    const result = await Tesseract.recognize(img, 'eng', {
+      logger: m => {
+        const statusEl = document.getElementById('ocrStatus');
+        const barEl = document.getElementById('ocrBar');
+        if(statusEl) statusEl.textContent = m.status + (m.progress!==undefined ? ' — '+Math.round(m.progress*100)+'%' : '');
+        if(barEl && m.progress!==undefined) barEl.style.width = Math.round(m.progress*100)+'%';
+      }
+    });
+    const text = (result.data.text||'').trim();
+    const words = result.data.words || [];
+    const avgConf = words.length ? Math.round(words.reduce((s,w)=>s+w.confidence,0)/words.length) : Math.round(result.data.confidence||0);
+    const confChip = avgConf>=70 ? 'success' : (avgConf>=40 ? 'warning' : 'critical');
+    const guessedAmount = extractAmountGuess(text);
+    const guessedDate = extractDateGuess(text);
+    let autofillNote = '';
+    if(guessedAmount){ document.getElementById('f_amount').value = guessedAmount; autofillNote += `Amount field auto-filled from a ₹/number pattern match (verify it). `; }
+    if(guessedDate){ document.getElementById('f_date').value = guessedDate; autofillNote += `Date field auto-filled from a date pattern match (verify it).`; }
+    panel.innerHTML = `
+      <div class="flow-note" style="margin-top:12px;">Real OCR ran on this image — this is the actual recognized text, not a script. ${autofillNote || 'Bank/Payee/Amount-in-words are not auto-mapped: copy the relevant text below into the fields yourself — reliably knowing "this line is the payee" needs the cheque-trained model the real backend provides.'}</div>
+      <div class="ocr-conf-bar"><span class="ocr-status">OCR confidence</span><div class="ocr-conf-track"><div class="ocr-conf-fill" style="width:${avgConf}%;background:var(--${confChip==='success'?'success':confChip==='warning'?'warning':'danger'})"></div></div><span class="chip ${confChip}">${avgConf}%</span></div>
+      <div class="ocr-raw">${text ? text.replace(/</g,'&lt;') : '(no text recognized — try a clearer or higher-contrast image)'}</div>
+      <div style="margin-top:8px;"><button class="btn sm" onclick="runOCR()">&#8635; Run Again</button></div>`;
+  }catch(err){
+    panel.innerHTML = `<div class="flow-note bad" style="margin-top:12px;">OCR failed to run: ${String(err.message||err)}. Check your internet connection and try again.</div>`;
+  }
 }
 function getFieldVals(){
   return {
