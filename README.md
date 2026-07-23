@@ -5,6 +5,25 @@ the V4 Live Demo with dummy branding ("ChqFlow360" / "Workspace A").
 No build step, no Node.js, no install of any kind required — everything
 (HTML, CSS, and JavaScript) lives in the one file below.
 
+## Latest feedback round (applied)
+
+- **Theme**: both files now default to a light/white theme instead of
+  dark — `index.html` still has a working Dark/Light switch in the top
+  bar (now defaulting to Light); `test-console.html` is light-only.
+- **Straight-Through Processing (STP)**: a new Settings toggle
+  (`index.html`, presentational) and a fully real Settings tab
+  (`test-console.html`) — turn it on, set a threshold (default 95%),
+  and any cheque meeting it with clean hygiene and no duplicate is
+  auto-registered on submit, skipping the checker queue entirely.
+- **Clickable navigation**: every tab and side-list that used to be
+  decorative — Cheque Inbox's filters, Capture & Review's four modes,
+  Cheque Lifecycle's customer list, Cheque Transfers' two tabs, the
+  Masters list (all 8 masters), and Audit Logs' module filters — now
+  actually switches what's shown, in `index.html`.
+- **Font**: not changed yet — pending the exact SupplySphereAI
+  reference (file path, or the font name/size) to match it precisely
+  rather than guess.
+
 ## Two files in here
 
 - **`index.html`** — the scripted Live Demo (5 pre-written cheques,
