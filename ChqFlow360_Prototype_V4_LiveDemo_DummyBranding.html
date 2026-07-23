@@ -120,7 +120,7 @@
   .theme-toggle{display:flex;align-items:center;gap:6px;font-size:10.5px;color:var(--text-dim);}
   .switch{width:34px;height:19px;border-radius:99px;background:var(--card2);border:1px solid var(--border-lt);position:relative;cursor:pointer;flex:0 0 auto;}
   .switch .knob{position:absolute;top:2px;left:2px;width:13px;height:13px;border-radius:50%;background:var(--primary);transition:left .15s ease;}
-  .app-shell:not(.light-theme) .switch .knob{left:17px;}
+  .app-shell.light-theme .switch .knob{left:17px;}
   .avatar{width:32px;height:32px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;}
   .user-meta{line-height:1.25;}
   .user-meta .n{font-size:11.5px;font-weight:700;color:var(--text);}
@@ -506,35 +506,40 @@ dashboard: ()=>`
     </div>
   </div>`,
 
-inbox: ()=>`
+inbox: ()=>{
+  const rows = [
+    {no:'000148', cust:'Global Steel Ltd.', amt:'4,10,000', stage:'review', chip:'info', label:'AI Review', owner:'System', upd:'2 min ago', by:'System'},
+    {no:'000147', cust:'PQR Logistics', amt:'21,30,000', stage:'exception', chip:'critical', label:'Exception', owner:'A. Rao', upd:'18 min ago', by:'A. Rao'},
+    {no:'000146', cust:'XYZ Traders', amt:'8,75,000', stage:'checker', chip:'warning', label:'Verification', owner:'P. Iyer', upd:'41 min ago', by:'A. Rao'},
+    {no:'000145', cust:'ABC Industries', amt:'12,50,000', stage:'review', chip:'success', label:'OCR Completed', owner:'A. Rao', upd:'1 hr ago', by:'A. Rao'},
+    {no:'000144', cust:'Nova Infra LLP', amt:'89,500', stage:'needscapture', chip:'neutral', label:'Needs Capture', owner:'&mdash;', upd:'2 hr ago', by:'&mdash;'},
+    {no:'000143', cust:'Verve Realty', amt:'6,12,000', stage:'checker', chip:'warning', label:'Verification', owner:'P. Iyer', upd:'3 hr ago', by:'A. Rao'},
+  ];
+  const tabs = [
+    {key:'all', label:'All'}, {key:'needscapture', label:'Needs Capture'}, {key:'review', label:'In Review'},
+    {key:'checker', label:'Awaiting Checker'}, {key:'exception', label:'Exceptions'},
+  ];
+  const active = subTab.inbox;
+  const filtered = active==='all' ? rows : rows.filter(r=>r.stage===active);
+  const tabHtml = tabs.map(t=>{
+    const n = t.key==='all' ? rows.length : rows.filter(r=>r.stage===t.key).length;
+    return `<div class="tab ${active===t.key?'active':''}" onclick="setSubTab('inbox','${t.key}')">${t.label} (${t.key==='all'?391:n})</div>`;
+  }).join('');
+  const rowsHtml = filtered.length ? filtered.map(r=>`<tr><td>${r.no}</td><td class="dim">${r.cust}</td><td class="num">&#8377;${r.amt}</td><td><span class="chip ${r.chip}">${r.label}</span></td><td class="dim">${r.owner}</td><td class="meta">${r.upd}</td><td class="meta">${r.by}</td></tr>`).join('') : `<tr><td colspan="7"><div class="empty">No cheques in this stage right now.</div></td></tr>`;
+  return `
   <div class="page-head"><div><h3>Cheque Inbox</h3><div class="desc">Every cheque, any stage &mdash; the triage view before routing</div></div></div>
-  <div class="tab-row"><div class="tab active">All (391)</div><div class="tab">Needs Capture</div><div class="tab">In Review</div><div class="tab">Awaiting Checker</div><div class="tab">Exceptions</div></div>
+  <div class="tab-row">${tabHtml}</div>
   <table>
     <tr><th>Cheque</th><th>Customer</th><th class="num">Amount</th><th>Stage</th><th>Owner</th><th>Updated</th><th>Updated By</th></tr>
-    <tr><td>000148</td><td class="dim">Global Steel Ltd.</td><td class="num">&#8377;4,10,000</td><td><span class="chip info">AI Review</span></td><td class="dim">System</td><td class="meta">2 min ago</td><td class="meta">System</td></tr>
-    <tr><td>000147</td><td class="dim">PQR Logistics</td><td class="num">&#8377;21,30,000</td><td><span class="chip critical">Exception</span></td><td class="dim">A. Rao</td><td class="meta">18 min ago</td><td class="meta">A. Rao</td></tr>
-    <tr><td>000146</td><td class="dim">XYZ Traders</td><td class="num">&#8377;8,75,000</td><td><span class="chip warning">Verification</span></td><td class="dim">P. Iyer</td><td class="meta">41 min ago</td><td class="meta">A. Rao</td></tr>
-    <tr><td>000145</td><td class="dim">ABC Industries</td><td class="num">&#8377;12,50,000</td><td><span class="chip success">OCR Completed</span></td><td class="dim">A. Rao</td><td class="meta">1 hr ago</td><td class="meta">A. Rao</td></tr>
-  </table>`,
+    ${rowsHtml}
+  </table>`;
+},
 
-capture: ()=>`
-  <div class="page-head"><div><div class="breadcrumb">Transaction Flow</div><h3>Capture &amp; Review</h3><div class="desc">Capture, confirm, and submit &mdash; one screen, start to finish</div></div>
-    <button class="btn primary">Submit for Checker Approval</button></div>
-  <div class="flow-note purple">Capture and field review now live on one screen &mdash; no more switching to a separate OCR Studio to finish a single cheque.</div>
-  <div class="steps">
-    <div class="step done"><div class="dot">&#10003;</div><div class="label">Capture</div></div><div class="bar"></div>
-    <div class="step now"><div class="dot">2</div><div class="label">Review &amp; Submit</div></div><div class="bar"></div>
-    <div class="step"><div class="dot">3</div><div class="label">Verification Desk</div></div><div class="bar"></div>
-    <div class="step"><div class="dot">4</div><div class="label">Registered</div></div>
-  </div>
-  <div class="tab-row"><div class="tab active">Scan / Camera</div><div class="tab new-tag">Upload from Device</div><div class="tab">Bulk Batch</div><div class="tab">Manual Entry</div></div>
-  <div class="flow-note">Guardrails are now Admin-configurable per workspace (Settings &rsaquo; Capture &amp; Upload Guardrails) rather than fixed in code. On desktop, use scanner or upload a file from this computer; camera capture is for the mobile app.</div>
-  <div class="two-col">
-    <div class="dropzone">
-      <b>&#128247; Capture, scan, or upload a cheque</b>
-      Connect a scanner, use &ldquo;Open Camera&rdquo; on the mobile app, or upload a file from this computer.
-      <div style="margin-top:12px;"><button class="btn primary sm">Open Camera</button> <button class="btn sm">Use Scanner</button> <button class="btn sm">Browse Files&hellip;</button></div>
-    </div>
+capture: ()=>{
+  const tabs = [{key:'scan',label:'Scan / Camera'},{key:'upload',label:'Upload from Device'},{key:'bulk',label:'Bulk Batch'},{key:'manual',label:'Manual Entry'}];
+  const active = subTab.capture;
+  const tabHtml = tabs.map(t=>`<div class="tab ${active===t.key?'active':''}" onclick="setSubTab('capture','${t.key}')">${t.label}</div>`).join('');
+  const activeEntries = `
     <div class="card">
       <div class="card-head"><h4>Active Entries</h4><span class="hint">Snapshot &mdash; select a row to review below</span></div>
       <table>
@@ -543,8 +548,8 @@ capture: ()=>`
         <tr style="background:var(--card2)"><td>000932</td><td class="dim">Nova Infra LLP</td><td><span class="chip success">Read &mdash; ready to submit</span></td><td class="meta">2 min ago</td><td class="meta">A. Rao</td></tr>
         <tr><td>000933</td><td class="dim">Verve Realty</td><td><span class="chip critical">Read error &mdash; retry</span></td><td class="meta">5 min ago</td><td class="meta">A. Rao</td></tr>
       </table>
-    </div>
-  </div>
+    </div>`;
+  const ocrReview = `
   <div class="two-col" style="margin-top:12px;">
     <div>${chequeSVG({bank:'ICICI Bank', ifsc:'ICIC0000456', branch:'Pune Camp', payee:'Nova Infra LLP', amount:'89,500', amountWords:'Eighty Nine Thousand Five Hundred Only', date:'09072026', chequeNo:'000932', accNo:'62305471002', signed:true})}</div>
     <div class="card">
@@ -566,16 +571,67 @@ capture: ()=>`
       </div>
       <div style="margin-top:12px;"><button class="btn primary sm">Confirm &amp; Submit for Checker</button></div>
     </div>
+  </div>`;
+  let body;
+  if(active==='scan'){
+    body = `<div class="two-col">
+      <div class="dropzone">
+        <b>&#128247; Scan or capture a cheque</b>
+        Connect a scanner, or use &ldquo;Open Camera&rdquo; on the mobile app.
+        <div style="margin-top:12px;"><button class="btn primary sm">Open Camera</button> <button class="btn sm">Use Scanner</button></div>
+      </div>
+      ${activeEntries}
+    </div>${ocrReview}`;
+  } else if(active==='upload'){
+    body = `<div class="two-col">
+      <div class="dropzone">
+        <b>&#128193; Upload from this computer</b>
+        Drag a file here, or click to browse your local drive &mdash; desktop-only, per Settings &rsaquo; Capture &amp; Upload Guardrails.
+        <div style="margin-top:12px;"><button class="btn primary sm">Browse Files&hellip;</button></div>
+      </div>
+      ${activeEntries}
+    </div>${ocrReview}`;
+  } else if(active==='bulk'){
+    body = `<div class="card">
+      <div class="card-head"><h4>Bulk Batch Import</h4><span class="hint">Lives here, not a separate module</span></div>
+      <div class="dropzone" style="margin-bottom:12px;"><b>&#128228; Drag a batch file here</b>CSV/XLSX per template &mdash; up to 500 cheques per batch &middot; <button class="btn sm" style="margin-top:8px;">Download Template</button></div>
+      <table>
+        <tr><th>File</th><th>Rows</th><th>Status</th><th>Updated</th><th>Updated By</th></tr>
+        <tr><td>batch_0709_maker.xlsx</td><td class="num">86</td><td><span class="chip success">Completed</span></td><td class="meta">1 hr ago</td><td class="meta">A. Rao</td></tr>
+        <tr><td>batch_0707_maker.xlsx</td><td class="num">40</td><td><span class="chip critical">3 rows failed</span></td><td class="meta">2 days ago</td><td class="meta">A. Rao</td></tr>
+      </table>
+    </div>`;
+  } else {
+    body = `<div class="card">
+      <div class="card-head"><h4>Manual Entry</h4><span class="hint">No scan or upload &mdash; key it in directly</span></div>
+      <div class="form-grid">
+        <div class="field"><label>Bank</label><div class="input" style="color:var(--placeholder)">Select bank&hellip;</div></div>
+        <div class="field"><label>Branch / IFSC</label><div class="input" style="color:var(--placeholder)">Enter IFSC&hellip;</div></div>
+        <div class="field"><label>Cheque No.</label><div class="input" style="color:var(--placeholder)">Enter cheque number&hellip;</div></div>
+        <div class="field"><label>Date</label><div class="input" style="color:var(--placeholder)">DD/MM/YYYY</div></div>
+        <div class="field"><label>Amount (&#8377;)</label><div class="input" style="color:var(--placeholder)">0.00</div></div>
+        <div class="field"><label>Amount in Words</label><div class="input" style="color:var(--placeholder)">Auto-suggested from amount&hellip;</div></div>
+        <div class="field"><label>Payee</label><div class="input" style="color:var(--placeholder)">Enter payee&hellip;</div></div>
+        <div class="field"><label>Drawer</label><div class="input" style="color:var(--placeholder)">Enter drawer&hellip;</div></div>
+        <div class="field"><label>Signed</label><div class="select">Yes</div></div>
+      </div>
+      <div style="margin-top:12px;"><button class="btn primary sm">Submit for Checker</button></div>
+    </div>`;
+  }
+  return `
+  <div class="page-head"><div><div class="breadcrumb">Transaction Flow</div><h3>Capture &amp; Review</h3><div class="desc">Capture, confirm, and submit &mdash; one screen, start to finish</div></div>
+    <button class="btn primary">Submit for Checker Approval</button></div>
+  <div class="flow-note purple">Capture and field review now live on one screen &mdash; no more switching to a separate OCR Studio to finish a single cheque.</div>
+  <div class="steps">
+    <div class="step done"><div class="dot">&#10003;</div><div class="label">Capture</div></div><div class="bar"></div>
+    <div class="step now"><div class="dot">2</div><div class="label">Review &amp; Submit</div></div><div class="bar"></div>
+    <div class="step"><div class="dot">3</div><div class="label">Verification Desk</div></div><div class="bar"></div>
+    <div class="step"><div class="dot">4</div><div class="label">Registered</div></div>
   </div>
-  <div class="card" style="margin-top:12px;">
-    <div class="card-head"><h4>Bulk Batch Import</h4><span class="hint">Lives here, not a separate module</span></div>
-    <div class="dropzone" style="margin-bottom:12px;"><b>&#128228; Drag a batch file here</b>CSV/XLSX per template &mdash; up to 500 cheques per batch &middot; <button class="btn sm" style="margin-top:8px;">Download Template</button></div>
-    <table>
-      <tr><th>File</th><th>Rows</th><th>Status</th><th>Updated</th><th>Updated By</th></tr>
-      <tr><td>batch_0709_maker.xlsx</td><td class="num">86</td><td><span class="chip success">Completed</span></td><td class="meta">1 hr ago</td><td class="meta">A. Rao</td></tr>
-      <tr><td>batch_0707_maker.xlsx</td><td class="num">40</td><td><span class="chip critical">3 rows failed</span></td><td class="meta">2 days ago</td><td class="meta">A. Rao</td></tr>
-    </table>
-  </div>`,
+  <div class="tab-row">${tabHtml}</div>
+  <div class="flow-note">Guardrails are now Admin-configurable per workspace (Settings &rsaquo; Capture &amp; Upload Guardrails) rather than fixed in code. On desktop, use scanner or upload a file from this computer; camera capture is for the mobile app.</div>
+  ${body}`;
+},
 
 verify: ()=>`
   <div class="page-head"><div><div class="breadcrumb">Transaction Flow</div><h3>Verification Desk</h3><div class="desc">22 cheques awaiting your decision &mdash; every line item scannable and actionable, no click-through needed</div></div></div>
@@ -749,54 +805,90 @@ loanmap: ()=> deploymentMode==='embedded' ? `
     </div>
   </div>`,
 
-lifecycle: ()=>`
+lifecycle: ()=>{
+  const data = {
+    'Anand Constructions': {count:6, cheques:[
+        {no:'#004790', amt:'3,20,000', storage:'FRFC &middot; Mumbai &middot; B-14', chip:'warning', label:'Due Soon', upd:'2 hr ago'},
+        {no:'#004712', amt:'1,10,000', storage:'Branch &middot; Pune', chip:'success', label:'Presented', upd:'4 days ago'},
+        {no:'#004601', amt:'75,000', storage:'Locker &middot; Mumbai', chip:'neutral', label:'Surrendered', upd:'2 wks ago'},
+      ], timelineChq:'#004790', timeline:[
+        {done:true, label:'Registered', when:'05 Jul 2026, 10:12 &middot; Maker: A. Rao'},
+        {done:true, label:'Checker Approved', when:'05 Jul 2026, 15:40 &middot; Checker: P. Iyer'},
+        {done:true, label:'Stored &mdash; FRFC Locker B-14', when:'06 Jul 2026, 09:05 &middot; Check-in by branch custodian'},
+        {done:false, label:'Due for Presentation', when:'Due 11 Jul 2026 &middot; 2 days remaining'},
+      ], reg:[
+        {no:'#004790', dir:'success', dirLabel:'Inward', note:'Received from Anand Constructions', by:'A. Rao', upd:'05 Jul, 10:12'},
+        {no:'#004712', dir:'warning', dirLabel:'Outward', note:'Sent for presentation &mdash; HDFC Bank', by:'Custodian, Pune', upd:'4 days ago'},
+      ]},
+    'Nova Infra LLP': {count:3, cheques:[
+        {no:'#004918', amt:'89,500', storage:'FRFC &middot; Mumbai &middot; B-09', chip:'warning', label:'Due Soon', upd:'25 min ago'},
+        {no:'#004650', amt:'1,45,000', storage:'Branch &middot; Pune', chip:'success', label:'Presented', upd:'1 wk ago'},
+      ], timelineChq:'#004918', timeline:[
+        {done:true, label:'Registered', when:'09 Jul 2026, 08:40 &middot; Maker: A. Rao'},
+        {done:true, label:'Checker Approved', when:'09 Jul 2026, 09:05 &middot; Checker: P. Iyer'},
+        {done:false, label:'Due for Presentation', when:'Due 14 Jul 2026 &middot; 5 days remaining'},
+      ], reg:[
+        {no:'#004918', dir:'success', dirLabel:'Inward', note:'Received from Nova Infra LLP', by:'A. Rao', upd:'25 min ago'},
+      ]},
+    'Verve Realty': {count:2, cheques:[
+        {no:'#004909', amt:'6,12,000', storage:'FRFC &middot; Mumbai &middot; B-14', chip:'critical', label:'Signature Review', upd:'1 hr ago'},
+      ], timelineChq:'#004909', timeline:[
+        {done:true, label:'Registered', when:'09 Jul 2026, 07:55 &middot; Maker: A. Rao'},
+        {done:false, label:'Flagged &mdash; Fraud Detection', when:'Signature match 61% &middot; awaiting Risk review'},
+      ], reg:[
+        {no:'#004909', dir:'success', dirLabel:'Inward', note:'Received from Verve Realty', by:'A. Rao', upd:'1 hr ago'},
+      ]},
+    'Global Steel Ltd.': {count:4, cheques:[
+        {no:'#004833', amt:'4,10,000', storage:'Branch &middot; Ahmedabad', chip:'critical', label:'Duplicate Flag', upd:'6 hr ago'},
+        {no:'#004601b', amt:'2,00,000', storage:'Locker &middot; Mumbai', chip:'neutral', label:'Surrendered', upd:'3 wks ago'},
+      ], timelineChq:'#004833', timeline:[
+        {done:true, label:'Registered', when:'09 Jul 2026, 03:10 &middot; Maker: A. Rao'},
+        {done:false, label:'Flagged &mdash; Duplicate cheque no.', when:'Routed to Fraud Detection'},
+      ], reg:[
+        {no:'#004833', dir:'success', dirLabel:'Inward', note:'Received from Global Steel Ltd.', by:'A. Rao', upd:'6 hr ago'},
+      ]},
+  };
+  const names = Object.keys(data);
+  const cust = data[lifecycleCustomer] || data[names[0]];
+  const custListHtml = names.map(n=>`<div class="li ${lifecycleCustomer===n?'active':''}" onclick="setLifecycleCustomer('${n}')">${n}<span class="n">${data[n].count}</span></div>`).join('');
+  const chequeRows = cust.cheques.map(c=>`<tr><td>${c.no}</td><td class="num">&#8377;${c.amt}</td><td class="dim">${c.storage}</td><td><span class="chip ${c.chip}">${c.label}</span></td><td class="meta">${c.upd}</td><td class="meta">Custodian</td><td><button class="btn sm">Transfer</button></td></tr>`).join('');
+  const timelineHtml = cust.timeline.map(s=>`<div style="display:flex;gap:10px;margin-bottom:12px;"><div class="step ${s.done?'done':'now'}" style="flex:0;"><div class="dot">${s.done?'&#10003;':'&#8226;'}</div></div><div><b style="font-size:11.5px;">${s.label}</b><div style="font-size:10.5px;color:var(--text-dim);">${s.when}</div></div></div>`).join('');
+  const regRows = cust.reg.map(r=>`<tr><td>${r.no}</td><td><span class="chip ${r.dir}">${r.dirLabel}</span></td><td class="dim">${r.note}</td><td class="dim">${r.by}</td><td class="meta">${r.upd}</td></tr>`).join('');
+  return `
   <div class="page-head"><div><h3>Cheque Lifecycle</h3><div class="desc">Customer-wise, drilled into cheque basis</div></div></div>
   <div class="flow-note">Check-in / Check-out below logs <b>external</b> movement of the physical cheque &ndash; received from the customer, sent out for bank presentation, or returned to the customer. Movement between your <b>own internal</b> branches/departments is a different action &mdash; see <b>Cheque Transfers</b>.</div>
   <div class="two-col" style="grid-template-columns:200px 1fr;">
     <div class="card">
       <div class="card-head"><h4>Customers</h4></div>
-      <div class="side-list">
-        <div class="li active">Anand Constructions<span class="n">6</span></div>
-        <div class="li">Nova Infra LLP<span class="n">3</span></div>
-        <div class="li">Verve Realty<span class="n">2</span></div>
-        <div class="li">Global Steel Ltd.<span class="n">4</span></div>
-      </div>
+      <div class="side-list">${custListHtml}</div>
     </div>
     <div>
       <div class="card">
-        <div class="card-head"><h4>Anand Constructions &mdash; Cheques</h4><span class="hint">6 total</span></div>
+        <div class="card-head"><h4>${lifecycleCustomer} &mdash; Cheques</h4><span class="hint">${cust.count} total</span></div>
         <table>
           <tr><th>Cheque</th><th class="num">Amount</th><th>Storage</th><th>Status</th><th>Updated</th><th>Updated By</th><th></th></tr>
-          <tr style="background:var(--card2)"><td>#004790</td><td class="num">&#8377;3,20,000</td><td class="dim">FRFC &middot; Mumbai &middot; B-14</td><td><span class="chip warning">Due Soon</span></td><td class="meta">2 hr ago</td><td class="meta">Custodian</td><td><button class="btn sm">Transfer</button></td></tr>
-          <tr><td>#004712</td><td class="num">&#8377;1,10,000</td><td class="dim">Branch &middot; Pune</td><td><span class="chip success">Presented</span></td><td class="meta">4 days ago</td><td class="meta">Custodian</td><td><button class="btn sm">Transfer</button></td></tr>
-          <tr><td>#004601</td><td class="num">&#8377;75,000</td><td class="dim">Locker &middot; Mumbai</td><td><span class="chip neutral">Surrendered</span></td><td class="meta">2 wks ago</td><td class="meta">Custodian</td><td><button class="btn sm">Transfer</button></td></tr>
+          ${chequeRows}
         </table>
       </div>
       <div class="card">
-        <div class="card-head"><h4>#004790 &mdash; Timeline</h4></div>
-        <div style="display:flex;gap:10px;margin-bottom:12px;"><div class="step done" style="flex:0;"><div class="dot">&#10003;</div></div><div><b style="font-size:11.5px;">Registered</b><div style="font-size:10.5px;color:var(--text-dim);">05 Jul 2026, 10:12 &middot; Maker: A. Rao</div></div></div>
-        <div style="display:flex;gap:10px;margin-bottom:12px;"><div class="step done" style="flex:0;"><div class="dot">&#10003;</div></div><div><b style="font-size:11.5px;">Checker Approved</b><div style="font-size:10.5px;color:var(--text-dim);">05 Jul 2026, 15:40 &middot; Checker: P. Iyer</div></div></div>
-        <div style="display:flex;gap:10px;margin-bottom:12px;"><div class="step done" style="flex:0;"><div class="dot">&#10003;</div></div><div><b style="font-size:11.5px;">Stored &mdash; FRFC Locker B-14</b><div style="font-size:10.5px;color:var(--text-dim);">06 Jul 2026, 09:05 &middot; Check-in by branch custodian</div></div></div>
-        <div style="display:flex;gap:10px;"><div class="step now" style="flex:0;"><div class="dot">4</div></div><div><b style="font-size:11.5px;">Due for Presentation</b><div style="font-size:10.5px;color:var(--text-dim);">Due 11 Jul 2026 &middot; 2 days remaining</div></div></div>
+        <div class="card-head"><h4>${cust.timelineChq} &mdash; Timeline</h4></div>
+        ${timelineHtml}
       </div>
       <div class="card">
         <div class="card-head"><h4>Check-in / Check-out Register &mdash; Inward / Outward</h4><span class="hint">External movement only</span></div>
         <table>
           <tr><th>Cheque</th><th>Direction</th><th>Counterparty</th><th>Logged By</th><th>Updated</th></tr>
-          <tr><td>#004790</td><td><span class="chip success">Inward</span></td><td class="dim">Received from Anand Constructions</td><td class="dim">A. Rao</td><td class="meta">05 Jul, 10:12</td></tr>
-          <tr><td>#004712</td><td><span class="chip warning">Outward</span></td><td class="dim">Sent for presentation &mdash; HDFC Bank</td><td class="dim">Custodian, Pune</td><td class="meta">4 days ago</td></tr>
-          <tr><td>#004601</td><td><span class="chip neutral">Outward</span></td><td class="dim">Returned to customer &mdash; surrendered</td><td class="dim">Custodian, Mumbai</td><td class="meta">2 wks ago</td></tr>
+          ${regRows}
         </table>
         <div style="margin-top:10px;"><button class="btn sm">+ Log Check-in / Check-out</button></div>
       </div>
     </div>
-  </div>`,
+  </div>`;
+},
 
-transfer: ()=>`
-  <div class="page-head"><div><div class="breadcrumb">Transaction Flow</div><h3>Cheque Transfers</h3><div class="desc">Move a cheque between branches or departments</div></div>
-    <button class="btn primary">+ New Transfer</button></div>
-  <div class="tab-row"><div class="tab active">Custody Transfer</div><div class="tab">Ownership Transfer</div></div>
-  <div class="flow-note">This module covers movement between your own <b>internal</b> branches/departments only. External inward/outward movement (e.g. presentation to the paying bank, return to the customer) is logged separately at <b>Cheque Lifecycle &rsaquo; Check-in / Check-out</b>.</div>
+transfer: ()=>{
+  const active = subTab.transfer;
+  const custody = `
   <div class="flow-note amber">Custody Transfer moves where a cheque physically sits (e.g. FRFC Mumbai &rarr; Branch Pune). It's auto-logged into Cheque Lifecycle and needs no approval &mdash; the workflow owner doesn't change.</div>
   <div class="card">
     <div class="card-head"><h4>Custody Transfer Log</h4></div>
@@ -805,7 +897,8 @@ transfer: ()=>`
       <tr><td>#004790</td><td class="dim">FRFC &middot; Mumbai</td><td class="dim">Branch &middot; Pune</td><td class="dim">Custodian, Mumbai</td><td><span class="chip success">Completed</span></td><td class="meta">2 hr ago</td></tr>
       <tr><td>#004655</td><td class="dim">Branch &middot; Ahmedabad</td><td class="dim">FRFC &middot; Mumbai</td><td class="dim">Custodian, Ahmedabad</td><td><span class="chip warning">In Transit</span></td><td class="meta">1 day ago</td></tr>
     </table>
-  </div>
+  </div>`;
+  const ownership = `
   <div class="flow-note purple">Ownership Transfer re-routes the cheque's maker-checker workflow to a different branch/department &mdash; the receiving side's Checker must approve before they take ownership.</div>
   <div class="card">
     <div class="card-head"><h4>Ownership Transfer Requests</h4><span class="hint">1 selected</span></div>
@@ -821,7 +914,14 @@ transfer: ()=>`
         <td><div class="row-actions"><button class="btn xs">View</button></div></td>
       </tr>
     </table>
-  </div>`,
+  </div>`;
+  return `
+  <div class="page-head"><div><div class="breadcrumb">Transaction Flow</div><h3>Cheque Transfers</h3><div class="desc">Move a cheque between branches or departments</div></div>
+    <button class="btn primary">+ New Transfer</button></div>
+  <div class="tab-row"><div class="tab ${active==='custody'?'active':''}" onclick="setSubTab('transfer','custody')">Custody Transfer</div><div class="tab ${active==='ownership'?'active':''}" onclick="setSubTab('transfer','ownership')">Ownership Transfer</div></div>
+  <div class="flow-note">This module covers movement between your own <b>internal</b> branches/departments only. External inward/outward movement (e.g. presentation to the paying bank, return to the customer) is logged separately at <b>Cheque Lifecycle &rsaquo; Check-in / Check-out</b>.</div>
+  ${active==='ownership' ? ownership : custody}`;
+},
 
 analytics: ()=>`
   <div class="page-head"><div><h3>Analytics &amp; Reports</h3><div class="desc">Portfolio view &middot; exportable</div></div><button class="btn sm">Export</button></div>
@@ -861,56 +961,76 @@ analytics: ()=>`
     </table>
   </div>`,
 
-masters: ()=> deploymentMode==='embedded' ? `
-  <div class="page-head"><div><h3>Masters</h3><div class="desc">Synced read-only mirror &mdash; owned by the Host system in Embedded mode</div></div><button class="btn sm">&#8635; Sync Now</button></div>
-  <div class="flow-note purple">Bank, Branch, IFSC, MICR, Entity, and Loan Type masters are fetched from the Host system so there's exactly one source of truth. Depositor and Cheque Type stay local &mdash; they're cheque-specific, not something a Loan Management System would define.</div>
+masters: ()=>{
+  const embedded = deploymentMode==='embedded';
+  const MASTERS = {
+    bank: {label:'Bank Master', count:42, local:false, cols:['Bank Code','Bank Name','Status'], rows:[
+      ['HDFC','HDFC Bank Ltd.','<span class="chip success">Active</span>'],
+      ['ICIC','ICICI Bank Ltd.','<span class="chip success">Active</span>'],
+      ['SBIN','State Bank of India','<span class="chip success">Active</span>'],
+    ]},
+    branch: {label:'Branch Master', count:318, local:false, cols:['Branch Code','Branch Name','City','Status'], rows:[
+      ['MUM001','Mumbai Fort','Mumbai','<span class="chip success">Active</span>'],
+      ['PUN014','Pune Camp','Pune','<span class="chip success">Active</span>'],
+      ['AMD007','Ahmedabad Navrangpura','Ahmedabad','<span class="chip success">Active</span>'],
+    ]},
+    ifsc: {label:'IFSC Code Master', count:318, local:false, cols:['IFSC Code','Bank','Branch'], rows:[
+      ['HDFC0001234','HDFC Bank Ltd.','Mumbai Fort'],
+      ['ICIC0000456','ICICI Bank Ltd.','Pune Camp'],
+      ['SBIN0002211','State Bank of India','Andheri East'],
+    ]},
+    micr: {label:'MICR Code Master', count:290, local:false, cols:['MICR Code','Bank','City'], rows:[
+      ['400240002','HDFC Bank Ltd.','Mumbai'],
+      ['411229003','ICICI Bank Ltd.','Pune'],
+      ['380002007','State Bank of India','Ahmedabad'],
+    ]},
+    entity: {label:'Entity Master', count:6, local:false, cols:['Entity Code','Entity Name','Status'], rows:[
+      ['SPFL','Shapoorji Pallonji Finance Pvt. Ltd.','<span class="chip success">Active</span>'],
+      ['ANCH01','Anchor Corp Partner','<span class="chip success">Active</span>'],
+    ]},
+    chequetype: {label:'Cheque Type Master', count:7, local:true, cols:['Type Code','Description','Status'], rows:[
+      ['SD','Security Deposit','<span class="chip success">Active</span>'],
+      ['PDC','Post-Dated Cheque','<span class="chip success">Active</span>'],
+      ['UDC','Undated Cheque','<span class="chip success">Active</span>'],
+      ['NACH','National Automated Clearing House','<span class="chip success">Active</span>'],
+    ]},
+    depositor: {label:'Depositor Master', count:154, local:true, cols:['Depositor','Type','Status'], rows:[
+      ['Anand Constructions','Borrower','<span class="chip success">Active</span>'],
+      ['R. Anand','Security Provider','<span class="chip success">Active</span>'],
+      ['SPFL Anchor Program','Anchor','<span class="chip success">Active</span>'],
+    ]},
+    loantype: {label:'Loan Type Master', count:11, local:false, cols:['Loan Type','Description','Status'], rows:[
+      ['Construction Finance','Term loan for construction projects','<span class="chip success">Active</span>'],
+      ['Supply Chain Finance','Anchor-backed vendor financing','<span class="chip success">Active</span>'],
+    ]},
+  };
+  const active = MASTERS[subTab.masters] ? subTab.masters : 'bank';
+  const m = MASTERS[active];
+  const listHtml = Object.keys(MASTERS).map(k=>{
+    const mm = MASTERS[k];
+    const tag = (embedded && mm.local) ? `<span class="chip redact" style="margin-left:4px;">Local</span>` : `<span class="n">${mm.count}</span>`;
+    return `<div class="li ${active===k?'active':''}" onclick="setSubTab('masters','${k}')">${mm.label}${tag}</div>`;
+  }).join('');
+  const rowsHtml = m.rows.map(r=>`<tr>${r.map(c=>`<td>${c}</td>`).join('')}</tr>`).join('');
+  const headHint = embedded
+    ? (m.local ? `Local &mdash; not synced from host` : `Source: Host LMS &middot; last synced 2 min ago`)
+    : `Bulk import supported`;
+  return `
+  <div class="page-head"><div><h3>Masters</h3><div class="desc">${embedded ? 'Synced read-only mirror &mdash; owned by the Host system in Embedded mode' : 'Front-end creatable &mdash; no code changes needed to onboard new data'}</div></div>${embedded ? `<button class="btn sm">&#8635; Sync Now</button>` : `<button class="btn primary sm">+ New Entry</button>`}</div>
+  ${embedded ? `<div class="flow-note purple">Bank, Branch, IFSC, MICR, Entity, and Loan Type masters are fetched from the Host system so there's exactly one source of truth. Depositor and Cheque Type stay local &mdash; they're cheque-specific, not something a Loan Management System would define.</div>` : ''}
   <div class="two-col" style="grid-template-columns:210px 1fr;">
     <div class="card">
-      <div class="side-list">
-        <div class="li active">Bank Master<span class="n">42</span></div>
-        <div class="li">Branch Master<span class="n">318</span></div>
-        <div class="li">IFSC Code Master<span class="n">318</span></div>
-        <div class="li">MICR Code Master<span class="n">290</span></div>
-        <div class="li">Entity Master<span class="n">6</span></div>
-        <div class="li">Cheque Type Master <span class="chip redact" style="margin-left:4px;">Local</span></div>
-        <div class="li">Depositor Master <span class="chip redact" style="margin-left:4px;">Local</span></div>
-        <div class="li">Loan Type Master<span class="n">11</span></div>
-      </div>
+      <div class="side-list">${listHtml}</div>
     </div>
     <div class="card">
-      <div class="card-head"><h4>Bank Master</h4><span class="hint">Source: Host LMS &middot; last synced 2 min ago</span></div>
+      <div class="card-head"><h4>${m.label}</h4><span class="hint">${headHint}</span></div>
       <table>
-        <tr><th>Bank Code</th><th>Bank Name</th><th>Status</th></tr>
-        <tr><td>HDFC</td><td>HDFC Bank Ltd.</td><td><span class="chip success">Active</span></td></tr>
-        <tr><td>ICIC</td><td>ICICI Bank Ltd.</td><td><span class="chip success">Active</span></td></tr>
-        <tr><td>SBIN</td><td>State Bank of India</td><td><span class="chip success">Active</span></td></tr>
+        <tr>${m.cols.map(c=>`<th>${c}</th>`).join('')}${embedded?'':'<th>Updated</th><th>Updated By</th>'}</tr>
+        ${embedded ? rowsHtml : m.rows.map(r=>`<tr>${r.map(c=>`<td>${c}</td>`).join('')}<td class="meta">2 mo ago</td><td class="meta">R. Kapoor</td></tr>`).join('')}
       </table>
     </div>
-  </div>` : `
-  <div class="page-head"><div><h3>Masters</h3><div class="desc">Front-end creatable &mdash; no code changes needed to onboard new data</div></div><button class="btn primary sm">+ New Entry</button></div>
-  <div class="two-col" style="grid-template-columns:210px 1fr;">
-    <div class="card">
-      <div class="side-list">
-        <div class="li active">Bank Master<span class="n">42</span></div>
-        <div class="li">Branch Master<span class="n">318</span></div>
-        <div class="li">IFSC Code Master<span class="n">318</span></div>
-        <div class="li">MICR Code Master<span class="n">290</span></div>
-        <div class="li">Entity Master<span class="n">6</span></div>
-        <div class="li">Cheque Type Master<span class="n">7</span></div>
-        <div class="li">Depositor Master<span class="n">154</span></div>
-        <div class="li">Loan Type Master<span class="n">11</span></div>
-      </div>
-    </div>
-    <div class="card">
-      <div class="card-head"><h4>Bank Master</h4><span class="hint">Bulk import supported</span></div>
-      <table>
-        <tr><th>Bank Code</th><th>Bank Name</th><th>Status</th><th>Updated</th><th>Updated By</th></tr>
-        <tr><td>HDFC</td><td>HDFC Bank Ltd.</td><td><span class="chip success">Active</span></td><td class="meta">2 mo ago</td><td class="meta">R. Kapoor</td></tr>
-        <tr><td>ICIC</td><td>ICICI Bank Ltd.</td><td><span class="chip success">Active</span></td><td class="meta">2 mo ago</td><td class="meta">R. Kapoor</td></tr>
-        <tr><td>SBIN</td><td>State Bank of India</td><td><span class="chip success">Active</span></td><td class="meta">2 mo ago</td><td class="meta">R. Kapoor</td></tr>
-      </table>
-    </div>
-  </div>`,
+  </div>`;
+},
 
 users: ()=> deploymentMode==='embedded' ? `
   <div class="page-head"><div><h3>Users &amp; Roles</h3><div class="desc">Identity comes from the Host system's SSO in Embedded mode &mdash; this screen maps it, it doesn't store it</div></div>
@@ -964,17 +1084,31 @@ workflow: ()=>`
     </table>
   </div>`,
 
-audit: ()=>`
+audit: ()=>{
+  const rows = [
+    {ts:'09 Jul 09:14', user:'P. Iyer', action:'Approved #004921', module:'Verification Desk'},
+    {ts:'09 Jul 08:52', user:'A. Rao', action:'Submitted #004921', module:'Capture & Review'},
+    {ts:'09 Jul 08:10', user:'RedactAI', action:'Redacted Aadhaar on upload (LN-2026-08813)', module:'Loan & Signatory Mapping'},
+    {ts:'08 Jul 17:10', user:'R. Kapoor', action:'Added Bank Master &ldquo;IDFB&rdquo;', module:'Masters'},
+    {ts:'08 Jul 16:02', user:'P. Iyer', action:'Rejected #004801 &mdash; &ldquo;Amount mismatch&rdquo;', module:'Verification Desk'},
+    {ts:'07 Jul 11:20', user:'Custodian, Mumbai', action:'Custody transfer #004790 &rarr; Branch Pune', module:'Transfers'},
+  ];
+  const tabs = ['All Modules','Capture & Review','Verification Desk','Transfers','Masters'];
+  const active = subTab.audit;
+  const filtered = active==='all' ? rows : rows.filter(r=>r.module===active);
+  const tabHtml = tabs.map(t=>{
+    const key = t==='All Modules' ? 'all' : t;
+    return `<div class="tab ${active===key?'active':''}" onclick="setSubTab('audit','${key}')">${t.replace('&','&amp;')}</div>`;
+  }).join('');
+  const rowsHtml = filtered.length ? filtered.map(r=>`<tr><td class="dim num">${r.ts}</td><td>${r.user}</td><td>${r.action}</td><td class="dim">${r.module.replace('&','&amp;')}</td></tr>`).join('') : `<tr><td colspan="4"><div class="empty">No entries for this module yet.</div></td></tr>`;
+  return `
   <div class="page-head"><div><h3>Audit Logs</h3><div class="desc">Immutable record &middot; filterable by module, user, date</div></div><button class="btn sm">Export</button></div>
-  <div class="tab-row"><div class="tab active">All Modules</div><div class="tab">Capture &amp; Review</div><div class="tab">Verification Desk</div><div class="tab">Transfers</div><div class="tab">Masters</div></div>
+  <div class="tab-row">${tabHtml}</div>
   <table>
     <tr><th>Timestamp</th><th>User</th><th>Action</th><th>Module</th></tr>
-    <tr><td class="dim num">09 Jul 09:14</td><td>P. Iyer</td><td>Approved #004921</td><td class="dim">Verification Desk</td></tr>
-    <tr><td class="dim num">09 Jul 08:52</td><td>A. Rao</td><td>Submitted #004921</td><td class="dim">Capture &amp; Review</td></tr>
-    <tr><td class="dim num">09 Jul 08:10</td><td>RedactAI</td><td>Redacted Aadhaar on upload (LN-2026-08813)</td><td class="dim">Loan &amp; Signatory Mapping</td></tr>
-    <tr><td class="dim num">08 Jul 17:10</td><td>R. Kapoor</td><td>Added Bank Master &ldquo;IDFB&rdquo;</td><td class="dim">Masters</td></tr>
-    <tr><td class="dim num">08 Jul 16:02</td><td>P. Iyer</td><td>Rejected #004801 &mdash; &ldquo;Amount mismatch&rdquo;</td><td class="dim">Verification Desk</td></tr>
-  </table>`,
+    ${rowsHtml}
+  </table>`;
+},
 
 agents: ()=>`
   <div class="page-head"><div><h3>AI Agents</h3><div class="desc">Full command centre &mdash; every agent, expanded from the dashboard widget</div></div></div>
@@ -1019,6 +1153,23 @@ settings: ()=>`
     <div class="form-grid" style="margin-top:12px;">
       <div class="field"><label>Max File Size</label><div class="input">25 MB</div></div>
       <div class="field"><label>Allowed Formats</label><div class="input">PDF, JPG, JPEG, PNG, TIFF</div></div>
+    </div>
+  </div>
+  <div class="card" style="margin-top:12px;">
+    <div class="card-head"><h4>Straight-Through Processing (STP)</h4><span class="hint">New &mdash; skip the checker for high-confidence cheques</span></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;padding:10px 0;border-bottom:1px solid var(--border);">
+      <div>
+        <div style="font-weight:700;font-size:12px;">Enable Straight-Through Processing</div>
+        <div style="font-size:10.5px;color:var(--text-dim);margin-top:3px;max-width:440px;">When on, a cheque that clears every hygiene check, isn't a duplicate, and meets the signature-match threshold below is registered automatically &mdash; it never enters the Verification Desk queue. Off by default; each workspace's Admin opts in.</div>
+      </div>
+      <div class="switch" style="background:rgba(34,197,94,.18);border-color:var(--success);"><div class="knob" style="left:19px;background:var(--success);"></div></div>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;padding:10px 0;">
+      <div>
+        <div style="font-weight:700;font-size:12px;">Signature-Match Threshold</div>
+        <div style="font-size:10.5px;color:var(--text-dim);margin-top:3px;">Cheques below this score, or with any hygiene/fraud flag, always go to a human checker regardless of this setting.</div>
+      </div>
+      <div class="input" style="width:64px;text-align:right;">95 %</div>
     </div>
   </div>
   <div class="card" style="margin-top:12px;">
@@ -1096,6 +1247,10 @@ integrations: ()=>`
 const stage = document.getElementById('stage');
 let current = 'login';
 let deploymentMode = 'standalone';
+let subTab = { inbox:'all', capture:'scan', transfer:'custody', masters:'bank', audit:'all' };
+let lifecycleCustomer = 'Anand Constructions';
+function setSubTab(screen, val){ subTab[screen]=val; render(); }
+function setLifecycleCustomer(name){ lifecycleCustomer=name; render(); }
 
 function shellChrome(activeKey, innerHtml){
   const nav = SCREENS.filter(s=>s.group);
@@ -1109,7 +1264,7 @@ function shellChrome(activeKey, innerHtml){
   });
   const embedded = deploymentMode === 'embedded';
   const embedBanner = embedded ? `<div class="embed-banner">&#128268; Embedded inside <b>Loan Management System</b> &middot; Context received: Customer &ldquo;Anand Constructions&rdquo; &middot; Loan LN-2026-08813 &middot; Identity via Host SSO</div>` : '';
-  return `<div class="app-shell" id="appShell">
+  return `<div class="app-shell light-theme" id="appShell">
     <div class="app-topbar">
       <div class="brand">ChqFlow360<span class="tenant">&nbsp;&middot; Workspace A</span></div>
       <div class="top-workspace">Workspace A</div>
@@ -1163,7 +1318,7 @@ function wireKpiLinks(){
 
 function render(){
   if(current === 'login'){
-    stage.innerHTML = `<div class="app-shell" id="appShell">${BODIES.login()}</div>`;
+    stage.innerHTML = `<div class="app-shell light-theme" id="appShell">${BODIES.login()}</div>`;
     const signIn = document.querySelector('.login-card .btn.primary');
     if(signIn) signIn.onclick = ()=>go('dashboard');
     const ssoBtn = document.querySelector('.sso-continue');

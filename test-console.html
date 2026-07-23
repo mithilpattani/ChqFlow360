@@ -1,14 +1,14 @@
 <title>ChqFlow360 — Test Console (Real Rules &amp; Workflow)</title>
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 <style>
-  html,body{height:100%;margin:0;background:#0B0B10;font-family:'Aptos','Segoe UI',system-ui,-apple-system,sans-serif;}
+  html,body{height:100%;margin:0;background:#F5F7FC;font-family:'Aptos','Segoe UI',system-ui,-apple-system,sans-serif;}
   *{box-sizing:border-box;}
   body{
-    --bg:#0B0B10; --surface:#15151D; --card:#181823; --card2:#1A1A25; --input:#191923; --border:#2B2B3D; --border-lt:#303040;
-    --text:#FFFFFF; --text-dim:#9CA3AF; --text-muted:#8E8EA5; --placeholder:#6B7280;
-    --primary:#2563EB; --primary-hover:#3B82F6; --primary-light:#60A5FA;
-    --purple:#7C3AED; --purple-glow:rgba(37,99,235,.20);
-    --success:#22C55E; --warning:#F59E0B; --danger:#EF4444; --info:#38BDF8;
+    --bg:#F5F7FC; --surface:#FFFFFF; --card:#FFFFFF; --card2:#EEF2FA; --input:#EEF2FA; --border:#D9E1F2; --border-lt:#C9D4EA;
+    --text:#0E1E4A; --text-dim:#4B5680; --text-muted:#7883A6; --placeholder:#9AA3C0;
+    --primary:#1D4ED8; --primary-hover:#1640B0; --primary-light:#2563EB;
+    --purple:#7C3AED; --purple-glow:rgba(124,58,237,.12);
+    --success:#16A34A; --warning:#B45309; --danger:#DC2626; --info:#0284C7;
     background:var(--bg); color:var(--text); font-size:12px; line-height:1.5; min-height:100vh;
   }
   .wrap{max-width:1180px;margin:0 auto;padding:22px 22px 60px;}
@@ -98,6 +98,16 @@
   .flow-note.warn{background:rgba(245,158,11,.10);border-color:rgba(245,158,11,.35);color:var(--warning);}
   .flow-note.bad{background:rgba(239,68,68,.10);border-color:rgba(239,68,68,.35);color:var(--danger);}
   .checkline{display:flex;align-items:center;gap:8px;font-size:11.5px;padding:6px 0;}
+  .switch{width:38px;height:21px;border-radius:99px;background:var(--card2);border:1px solid var(--border-lt);position:relative;cursor:pointer;flex:0 0 auto;}
+  .switch .knob{position:absolute;top:2px;left:2px;width:15px;height:15px;border-radius:50%;background:var(--text-muted);transition:left .15s ease, background .15s ease;}
+  .switch.on{background:rgba(34,197,94,.18);border-color:var(--success);}
+  .switch.on .knob{left:19px;background:var(--success);}
+  .settings-row{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 0;border-bottom:1px solid var(--border);}
+  .settings-row:last-child{border-bottom:none;}
+  .settings-row .lbl{font-weight:700;font-size:12px;}
+  .settings-row .sub{font-size:10.5px;color:var(--text-dim);margin-top:3px;max-width:440px;}
+  .threshold-input{display:flex;align-items:center;gap:6px;}
+  .threshold-input input{width:64px;border:1px solid var(--border-lt);background:var(--input);border-radius:8px;padding:7px 9px;font-size:12px;color:var(--text);font-family:inherit;text-align:right;}
 </style>
 
 <div class="wrap">
@@ -155,13 +165,14 @@ function fmtINR(n){ return '₹'+Number(n||0).toLocaleString('en-IN'); }
 function uid(){ return 'C'+Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
 
 /* ============ Persisted state ============ */
-const LS_CHEQUES='chqflow_tc_cheques_v1', LS_REGISTERED='chqflow_tc_registered_v1', LS_AUDIT='chqflow_tc_audit_v1';
+const LS_CHEQUES='chqflow_tc_cheques_v1', LS_REGISTERED='chqflow_tc_registered_v1', LS_AUDIT='chqflow_tc_audit_v1', LS_SETTINGS='chqflow_tc_settings_v1';
 function loadLS(k,fb){ try{ const v=JSON.parse(localStorage.getItem(k)); return v===null?fb:v; }catch(e){ return fb; } }
 function saveLS(k,v){ localStorage.setItem(k, JSON.stringify(v)); }
 let cheques = loadLS(LS_CHEQUES, []);
 let registeredNumbers = loadLS(LS_REGISTERED, []);
 let auditLog = loadLS(LS_AUDIT, []);
-function persist(){ saveLS(LS_CHEQUES,cheques); saveLS(LS_REGISTERED,registeredNumbers); saveLS(LS_AUDIT,auditLog); }
+let settings = loadLS(LS_SETTINGS, {stpEnabled:false, stpThreshold:95});
+function persist(){ saveLS(LS_CHEQUES,cheques); saveLS(LS_REGISTERED,registeredNumbers); saveLS(LS_AUDIT,auditLog); saveLS(LS_SETTINGS,settings); }
 function logAudit(action, chequeNo, by){ auditLog.unshift({at:new Date().toLocaleString('en-IN'), action, chequeNo, by}); persist(); }
 
 /* ============ Test case library ============ */
@@ -202,6 +213,7 @@ const TABS = [
   {key:'verify', label:'Verification Desk'},
   {key:'dashboard', label:'Dashboard'},
   {key:'audit', label:'Audit Log'},
+  {key:'settings', label:'Settings'},
 ];
 function renderTabs(){
   document.getElementById('tabs').innerHTML = TABS.map(t=>{
@@ -220,6 +232,7 @@ function render(){
   else if(currentTab==='verify') stage.innerHTML = renderVerify();
   else if(currentTab==='dashboard') stage.innerHTML = renderDashboard();
   else if(currentTab==='audit') stage.innerHTML = renderAudit();
+  else if(currentTab==='settings') stage.innerHTML = renderSettings();
   wireDropzone();
 }
 
@@ -413,19 +426,28 @@ function submitCheque(){
   const hygieneOk = wordsOk && dateInfo.status==='ok';
   const needsFraudReview = v.sigMatch!==null && v.sigMatch < 85;
   const entries = activeTestCase.batch ? uploadedImages.map((im,i)=>({...v, chequeNo: v.chequeNo+'-'+(i+1), img:im.url})) : [{...v, img:uploadedImages[0].url}];
+  let anyQueued = false;
   entries.forEach(e=>{
+    const isDuplicate = registeredNumbers.includes(e.chequeNo);
+    const stpEligible = settings.stpEnabled && hygieneOk && !needsFraudReview && !isDuplicate && e.sigMatch!==null && e.sigMatch>=settings.stpThreshold;
     const record = {
       id: uid(), testCaseId: activeTestCase.id, chequeNo:e.chequeNo, bank:e.bank, payee:e.payee, amount:e.amount, words:e.words,
       date:e.date, sigMatch:e.sigMatch, signed:e.signed, img:e.img,
       hygiene: {wordsOk, dateInfo},
-      status: needsFraudReview ? 'Fraud Review' : 'Awaiting Checker',
+      status: stpEligible ? 'Registered' : (needsFraudReview ? 'Fraud Review' : 'Awaiting Checker'),
       remarks: [],
     };
     cheques.push(record);
-    logAudit('Submitted for checker approval', record.chequeNo, 'Maker (Test Console)');
+    if(stpEligible){
+      registeredNumbers.push(e.chequeNo);
+      logAudit(`Auto-approved via Straight-Through Processing (${e.sigMatch}% ≥ ${settings.stpThreshold}% threshold)`, record.chequeNo, 'STP Engine');
+    } else {
+      anyQueued = true;
+      logAudit('Submitted for checker approval', record.chequeNo, 'Maker (Test Console)');
+    }
   });
   persist();
-  go('verify');
+  go(anyQueued ? 'verify' : 'dashboard');
 }
 
 /* ============ Verification Desk ============ */
@@ -524,9 +546,35 @@ function renderAudit(){
     ${auditLog.length ? `<table><tr><th>When</th><th>By</th><th>Action</th><th>Cheque</th></tr>${rows}</table>` : `<div class="empty">Nothing logged yet.</div>`}</div>`;
 }
 
+/* ============ Settings ============ */
+function renderSettings(){
+  return `
+    <div class="card">
+      <div class="card-head"><h4>Straight-Through Processing (STP)</h4><span class="hint">Real setting — changes what Submit does</span></div>
+      <div class="settings-row">
+        <div>
+          <div class="lbl">Enable Straight-Through Processing</div>
+          <div class="sub">When on, a cheque that passes every hygiene check, isn't a duplicate, and meets the signature-match threshold below is registered automatically on submit — it never enters the Checker queue. Off by default; each workspace's Admin opts in.</div>
+        </div>
+        <div class="switch ${settings.stpEnabled?'on':''}" onclick="toggleSTP()"><div class="knob"></div></div>
+      </div>
+      <div class="settings-row">
+        <div>
+          <div class="lbl">Signature-Match Threshold</div>
+          <div class="sub">Minimum signature-match score required for auto-approval. Cheques below this (or with any hygiene/fraud flag) always go to a human checker, regardless of this setting.</div>
+        </div>
+        <div class="threshold-input"><input type="number" min="1" max="100" id="stpThresholdInput" value="${settings.stpThreshold}" onchange="setSTPThreshold(this.value)"> %</div>
+      </div>
+    </div>
+    <div class="flow-note" style="margin-top:12px;">Try it: turn this on, then run Test 1 (Clean Cheque) again with a new cheque number — since it's clean and its signature match (96%) is above the default 95% threshold, it should land straight in "Registered" on the Dashboard without ever appearing in the Verification Desk queue.</div>
+  `;
+}
+function toggleSTP(){ settings.stpEnabled = !settings.stpEnabled; persist(); render(); }
+function setSTPThreshold(v){ const n = Math.max(1, Math.min(100, Number(v)||95)); settings.stpThreshold = n; persist(); }
+
 function resetAll(){
-  if(!confirm('This clears all test data (queue, registered numbers, audit log) from this browser. Continue?')) return;
-  cheques=[]; registeredNumbers=[]; auditLog=[]; persist();
+  if(!confirm('This clears all test data (queue, registered numbers, audit log, settings) from this browser. Continue?')) return;
+  cheques=[]; registeredNumbers=[]; auditLog=[]; settings={stpEnabled:false, stpThreshold:95}; persist();
   activeTestCase=null; uploadedImages=[];
   go('library');
 }
