@@ -5,65 +5,65 @@
   *{box-sizing:border-box;}
   body{
     --bg:#F5F7FC; --surface:#FFFFFF; --card:#FFFFFF; --card2:#EEF2FA; --input:#EEF2FA; --border:#D9E1F2; --border-lt:#C9D4EA;
-    --text:#0E1E4A; --text-dim:#4B5680; --text-muted:#7883A6; --placeholder:#9AA3C0;
+    --text:#0A1638; --text-dim:#4B5680; --text-muted:#7883A6; --placeholder:#9AA3C0;
     --primary:#1D4ED8; --primary-hover:#1640B0; --primary-light:#2563EB;
     --purple:#7C3AED; --purple-glow:rgba(124,58,237,.12);
-    --success:#16A34A; --warning:#B45309; --danger:#DC2626; --info:#0284C7;
-    background:var(--bg); color:var(--text); font-size:12px; line-height:1.5; min-height:100vh;
+    --success:#22C55E; --warning:#F59E0B; --danger:#EF4444; --info:#38BDF8;
+    background:var(--bg); color:var(--text); font-size:13.5px; line-height:1.5; min-height:100vh;
   }
   .wrap{max-width:1180px;margin:0 auto;padding:22px 22px 60px;}
   .topbar{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:6px;}
-  .brand{font-size:17px;font-weight:800;}
+  .brand{font-size:18.5px;font-weight:800;}
   .brand .amber{color:var(--warning);}
-  .brand small{display:block;font-size:10.5px;font-weight:600;color:var(--text-dim);margin-top:2px;}
+  .brand small{display:block;font-size:12px;font-weight:600;color:var(--text-dim);margin-top:2px;}
   .disclaimer{
     background:rgba(124,58,237,.10); border:1px solid rgba(124,58,237,.35); color:var(--primary-light);
-    border-radius:9px; padding:10px 14px; font-size:11.5px; line-height:1.6; margin:14px 0 18px;
+    border-radius:9px; padding:10px 14px; font-size:13px; line-height:1.6; margin:14px 0 18px;
   }
   .disclaimer b{color:var(--text);}
   .tabs{display:flex; gap:6px; border-bottom:1px solid var(--border); margin-bottom:20px; flex-wrap:wrap;}
-  .tab{padding:9px 14px; font-size:11.5px; font-weight:700; color:var(--text-dim); border-bottom:2px solid transparent; cursor:pointer;}
+  .tab{padding:9px 14px; font-size:13px; font-weight:700; color:var(--text-dim); border-bottom:2px solid transparent; cursor:pointer;}
   .tab.active{color:var(--primary-light); border-color:var(--primary);}
-  .tab .n{margin-left:6px; font-size:9.5px; background:var(--card2); padding:1px 6px; border-radius:99px; color:var(--text-muted);}
+  .tab .n{margin-left:6px; font-size:11px; background:var(--card2); padding:1px 6px; border-radius:99px; color:var(--text-muted);}
   .grid{display:grid; gap:14px;}
   .kpi-grid{grid-template-columns:repeat(auto-fit,minmax(150px,1fr));}
   .kpi{background:var(--card); border:1px solid var(--border); border-radius:14px; padding:15px; position:relative; overflow:hidden;}
   .kpi::before{content:"";position:absolute;left:0;top:0;width:4px;height:100%;background:var(--bar,var(--primary));}
   .kpi.c-blue{--bar:var(--primary);} .kpi.c-green{--bar:var(--success);} .kpi.c-amber{--bar:var(--warning);} .kpi.c-red{--bar:var(--danger);}
-  .kpi .label{font-size:10px;color:var(--text-dim);margin-bottom:8px;}
-  .kpi .value{font-size:24px;font-weight:800;font-variant-numeric:tabular-nums;}
+  .kpi .label{font-size:11.5px;color:var(--text-dim);margin-bottom:8px;}
+  .kpi .value{font-size:25.5px;font-weight:800;font-variant-numeric:tabular-nums;}
   .card{background:var(--card); border:1px solid var(--border); border-radius:14px; padding:16px;}
   .card + .card{margin-top:12px;}
   .card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px;}
-  .card-head h4{margin:0;font-size:13px;font-weight:700;}
-  .card-head .hint{font-size:10.5px;color:var(--text-muted);}
-  table{width:100%;border-collapse:collapse;font-size:11.5px;}
-  th{text-align:left;font-size:9.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--text-muted);font-weight:700;padding:0 9px 8px;border-bottom:1px solid var(--border);}
+  .card-head h4{margin:0;font-size:14.5px;font-weight:700;}
+  .card-head .hint{font-size:12px;color:var(--text-muted);}
+  table{width:100%;border-collapse:collapse;font-size:13px;}
+  th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--text-muted);font-weight:700;padding:0 9px 8px;border-bottom:1px solid var(--border);}
   th.num{text-align:right;}
   td{padding:9px;border-bottom:1px solid var(--border);vertical-align:middle;}
   tr:last-child td{border-bottom:none;}
   td.dim{color:var(--text-dim);}
   .num{font-variant-numeric:tabular-nums;text-align:right;}
-  .chip{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:700;padding:3px 9px;border-radius:99px;white-space:nowrap;}
+  .chip{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:700;padding:3px 9px;border-radius:99px;white-space:nowrap;}
   .chip.success{background:rgba(34,197,94,.15);color:var(--success);}
   .chip.warning{background:rgba(245,158,11,.15);color:var(--warning);}
   .chip.critical{background:rgba(239,68,68,.15);color:var(--danger);}
   .chip.neutral{background:rgba(156,163,175,.15);color:var(--text-dim);}
   .chip.info{background:rgba(56,189,248,.15);color:var(--info);}
   .chip::before{content:"";width:5px;height:5px;border-radius:50%;background:currentColor;}
-  .btn{font-size:11px;font-weight:700;padding:8px 13px;border-radius:8px;border:1px solid var(--border-lt);background:var(--card2);color:var(--text);cursor:pointer;display:inline-flex;align-items:center;gap:6px;}
+  .btn{font-size:12.5px;font-weight:700;padding:8px 13px;border-radius:8px;border:1px solid var(--border-lt);background:var(--card2);color:var(--text);cursor:pointer;display:inline-flex;align-items:center;gap:6px;}
   .btn:hover{border-color:var(--primary);}
   .btn.primary{background:var(--primary);border-color:var(--primary);color:#fff;}
   .btn.success{background:var(--success);border-color:var(--success);color:#062b12;}
   .btn.warning{background:var(--warning);border-color:var(--warning);color:#2b1b02;}
   .btn.danger{background:var(--danger);border-color:var(--danger);color:#fff;}
   .btn.ghost{background:transparent;}
-  .btn.sm{padding:6px 10px;font-size:10.5px;}
+  .btn.sm{padding:6px 10px;font-size:12px;}
   .btn:disabled{opacity:.4;cursor:not-allowed;}
   .field{display:flex;flex-direction:column;gap:5px;}
-  .field label{font-size:9.5px;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:.04em;}
+  .field label{font-size:11px;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:.04em;}
   .field input, .field select{
-    border:1px solid var(--border-lt);background:var(--input);border-radius:8px;padding:8px 9px;font-size:11.5px;color:var(--text);
+    border:1px solid var(--border-lt);background:var(--input);border-radius:8px;padding:8px 9px;font-size:13px;color:var(--text);
     font-family:inherit; width:100%;
   }
   .field input::placeholder{color:var(--placeholder);}
@@ -71,43 +71,43 @@
   .two-col{display:grid;grid-template-columns:1.1fr 1fr;gap:14px;align-items:start;}
   .dropzone{
     border:1.5px dashed var(--border-lt);border-radius:12px;padding:22px;text-align:center;color:var(--text-dim);
-    font-size:11px;background:var(--card2);cursor:pointer;transition:.2s;
+    font-size:12.5px;background:var(--card2);cursor:pointer;transition:.2s;
   }
   .dropzone.drag{border-color:var(--primary);background:rgba(37,99,235,.08);}
-  .dropzone b{color:var(--text);display:block;margin-bottom:4px;font-size:12.5px;}
+  .dropzone b{color:var(--text);display:block;margin-bottom:4px;font-size:14px;}
   .thumbs{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;}
   .thumbs img{width:110px;height:70px;object-fit:cover;border-radius:7px;border:1px solid var(--border-lt);}
   .ocr-progress{height:7px;background:var(--input);border-radius:20px;overflow:hidden;margin:10px 0;}
   .ocr-progress-fill{height:100%;background:var(--primary);border-radius:20px;transition:width .2s ease;}
-  .ocr-status{font-size:11px;color:var(--text-dim);}
-  .ocr-raw{background:var(--input);border:1px solid var(--border-lt);border-radius:8px;padding:10px;font-family:'Courier New',monospace;font-size:10.5px;color:var(--text-dim);white-space:pre-wrap;max-height:160px;overflow:auto;margin-top:8px;}
+  .ocr-status{font-size:12.5px;color:var(--text-dim);}
+  .ocr-raw{background:var(--input);border:1px solid var(--border-lt);border-radius:8px;padding:10px;font-family:'Courier New',monospace;font-size:12px;color:var(--text-dim);white-space:pre-wrap;max-height:160px;overflow:auto;margin-top:8px;}
   .ocr-conf-bar{display:flex;align-items:center;gap:8px;margin:8px 0;}
   .ocr-conf-track{flex:1;height:8px;background:var(--input);border-radius:20px;overflow:hidden;}
   .ocr-conf-fill{height:100%;border-radius:20px;}
   .tag-row{display:flex;gap:6px;flex-wrap:wrap;}
-  .empty{padding:30px 10px;text-align:center;color:var(--text-muted);font-size:11.5px;}
-  .tc-desc{font-size:11px;color:var(--text-dim);line-height:1.6;margin-bottom:14px;}
+  .empty{padding:30px 10px;text-align:center;color:var(--text-muted);font-size:13px;}
+  .tc-desc{font-size:12.5px;color:var(--text-dim);line-height:1.6;margin-bottom:14px;}
   .lib-row{cursor:pointer;}
   .lib-row:hover td{background:var(--card2);}
-  .badge-solid{display:inline-block;font-size:10px;font-weight:700;padding:5px 11px;border-radius:20px;}
+  .badge-solid{display:inline-block;font-size:11.5px;font-weight:700;padding:5px 11px;border-radius:20px;}
   .badge-solid.success{background:var(--success);color:#062b12;}
   .badge-solid.warning{background:var(--warning);color:#2b1b02;}
   .badge-solid.danger{background:var(--danger);color:#fff;}
   .badge-solid.neutral{background:var(--card2);color:var(--text-dim);border:1px solid var(--border-lt);}
-  .flow-note{background:rgba(37,99,235,.10);border:1px solid rgba(37,99,235,.35);color:var(--primary-light);border-radius:9px;padding:9px 12px;font-size:11px;font-weight:600;margin-bottom:12px;}
+  .flow-note{background:rgba(37,99,235,.10);border:1px solid rgba(37,99,235,.35);color:var(--primary-light);border-radius:9px;padding:9px 12px;font-size:12.5px;font-weight:600;margin-bottom:12px;}
   .flow-note.warn{background:rgba(245,158,11,.10);border-color:rgba(245,158,11,.35);color:var(--warning);}
   .flow-note.bad{background:rgba(239,68,68,.10);border-color:rgba(239,68,68,.35);color:var(--danger);}
-  .checkline{display:flex;align-items:center;gap:8px;font-size:11.5px;padding:6px 0;}
+  .checkline{display:flex;align-items:center;gap:8px;font-size:13px;padding:6px 0;}
   .switch{width:38px;height:21px;border-radius:99px;background:var(--card2);border:1px solid var(--border-lt);position:relative;cursor:pointer;flex:0 0 auto;}
   .switch .knob{position:absolute;top:2px;left:2px;width:15px;height:15px;border-radius:50%;background:var(--text-muted);transition:left .15s ease, background .15s ease;}
   .switch.on{background:rgba(34,197,94,.18);border-color:var(--success);}
   .switch.on .knob{left:19px;background:var(--success);}
   .settings-row{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 0;border-bottom:1px solid var(--border);}
   .settings-row:last-child{border-bottom:none;}
-  .settings-row .lbl{font-weight:700;font-size:12px;}
-  .settings-row .sub{font-size:10.5px;color:var(--text-dim);margin-top:3px;max-width:440px;}
+  .settings-row .lbl{font-weight:700;font-size:13.5px;}
+  .settings-row .sub{font-size:12px;color:var(--text-dim);margin-top:3px;max-width:440px;}
   .threshold-input{display:flex;align-items:center;gap:6px;}
-  .threshold-input input{width:64px;border:1px solid var(--border-lt);background:var(--input);border-radius:8px;padding:7px 9px;font-size:12px;color:var(--text);font-family:inherit;text-align:right;}
+  .threshold-input input{width:64px;border:1px solid var(--border-lt);background:var(--input);border-radius:8px;padding:7px 9px;font-size:13.5px;color:var(--text);font-family:inherit;text-align:right;}
 </style>
 
 <div class="wrap">
@@ -563,14 +563,17 @@ function renderSettings(){
           <div class="lbl">Signature-Match Threshold</div>
           <div class="sub">Minimum signature-match score required for auto-approval. Cheques below this (or with any hygiene/fraud flag) always go to a human checker, regardless of this setting.</div>
         </div>
-        <div class="threshold-input"><input type="number" min="1" max="100" id="stpThresholdInput" value="${settings.stpThreshold}" onchange="setSTPThreshold(this.value)"> %</div>
+        <div class="threshold-input" style="display:flex;align-items:center;gap:10px;">
+          <input type="range" min="85" max="100" step="1" value="${settings.stpThreshold}" style="width:140px;accent-color:var(--primary);" oninput="document.getElementById('stpThreshVal').textContent=this.value+' %'" onchange="setSTPThreshold(this.value)">
+          <span id="stpThreshVal" style="font-weight:700;min-width:44px;text-align:right;">${settings.stpThreshold} %</span>
+        </div>
       </div>
     </div>
     <div class="flow-note" style="margin-top:12px;">Try it: turn this on, then run Test 1 (Clean Cheque) again with a new cheque number — since it's clean and its signature match (96%) is above the default 95% threshold, it should land straight in "Registered" on the Dashboard without ever appearing in the Verification Desk queue.</div>
   `;
 }
 function toggleSTP(){ settings.stpEnabled = !settings.stpEnabled; persist(); render(); }
-function setSTPThreshold(v){ const n = Math.max(1, Math.min(100, Number(v)||95)); settings.stpThreshold = n; persist(); }
+function setSTPThreshold(v){ const n = Math.max(85, Math.min(100, Number(v)||95)); settings.stpThreshold = n; persist(); render(); }
 
 function resetAll(){
   if(!confirm('This clears all test data (queue, registered numbers, audit log, settings) from this browser. Continue?')) return;

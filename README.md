@@ -7,22 +7,48 @@ No build step, no Node.js, no install of any kind required — everything
 
 ## Latest feedback round (applied)
 
-- **Theme**: both files now default to a light/white theme instead of
-  dark — `index.html` still has a working Dark/Light switch in the top
-  bar (now defaulting to Light); `test-console.html` is light-only.
-- **Straight-Through Processing (STP)**: a new Settings toggle
-  (`index.html`, presentational) and a fully real Settings tab
-  (`test-console.html`) — turn it on, set a threshold (default 95%),
-  and any cheque meeting it with clean hygiene and no duplicate is
-  auto-registered on submit, skipping the checker queue entirely.
+- **Alert colors lightened**: `--success`/`--warning`/`--danger`/`--info`
+  were dark, muddy values left over from the old dark-theme-first design
+  (e.g. amber was `#B45309`, a near-brown). Both files now use brighter,
+  proper alert colors (`#22C55E` / `#F59E0B` / `#EF4444` / `#38BDF8`) —
+  fixes the amber badges/pills that were hard to read on the light theme.
+  Base text color was also nudged slightly darker (`#0A1638`) for
+  readability.
+- **Font size**: every `font-size` declaration in both files was
+  increased by 1.5px, across every screen. Matching the exact
+  SupplySphereAI font/size is still pending that reference.
+- **Straight-Through Processing (STP) is now a real, working toggle**
+  in `index.html` (previously just styled to look like one) — click it
+  to actually flip STP on/off, and drag the new Signature-Match
+  Threshold slider (85%–100%, each workspace's Admin sets their own —
+  no more hardcoded 95%). `test-console.html`'s threshold control was
+  also changed from a free-typed number box to the same 85–100 slider.
+- **AI Agents page redesigned**: instead of a static grid of cards, it's
+  now an illustrative pipeline diagram (OCR → Validation → Signature-
+  Match → Fraud → Mapping → Notification → Analytics, with RedactAI
+  shown branching off in parallel since it only runs on KYC uploads).
+  Every agent box is clickable and opens a detail panel below with
+  that agent's stats, recent activity, and an **Evals** section —
+  see the note below.
 - **Clickable navigation**: every tab and side-list that used to be
   decorative — Cheque Inbox's filters, Capture & Review's four modes,
   Cheque Lifecycle's customer list, Cheque Transfers' two tabs, the
   Masters list (all 8 masters), and Audit Logs' module filters — now
   actually switches what's shown, in `index.html`.
-- **Font**: not changed yet — pending the exact SupplySphereAI
-  reference (file path, or the font name/size) to match it precisely
-  rather than guess.
+
+### Does this prototype have "Evals"?
+
+Not before this round, and still not in the strict AI/ML sense (a
+harness that scores a model's output against ground truth and tracks
+that score over time). What's there now, added to answer this
+directly: each AI Agent's detail panel on the AI Agents page has an
+illustrative "Evals" box — dummy accuracy/sample-size/last-run figures,
+labelled as illustrative. The one agent with genuinely real output
+today is OCR (via Tesseract.js in `test-console.html`) — that's the one
+place a real eval (recognized text vs. a hand-labelled ground truth set)
+could actually be built if useful. Everything else (Validation, Fraud,
+Signature-Match, etc.) is rule-based or simulated, so "accuracy" for
+those is more honestly a test-pass-rate than a model eval.
 
 ## Two files in here
 
